@@ -17,7 +17,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cinema6/vast-player.git"
+    "url": "git+https://github.com/pulsepointinc/vast-player.git"
   },
   "keywords": [
     "vast",
@@ -35,9 +35,9 @@
   "author": "Reelcontent, Inc.",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/cinema6/vast-player/issues"
+    "url": "https://github.com/pulsepointinc/vast-player/issues"
   },
-  "homepage": "https://github.com/cinema6/vast-player#readme",
+  "homepage": "https://github.com/pulsepointinc/vast-player#readme",
   "devDependencies": {
     "brfs": "^1.4.3",
     "browserify": "^13.0.0",
@@ -57,6 +57,8 @@
     "karma-browserify": "^5.0.1",
     "karma-jasmine": "^0.3.7",
     "karma-phantomjs-launcher": "^1.0.0",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-firefox-launcher": "^1.1.0",
     "phantomjs-prebuilt": "^2.1.4",
     "proxyquire": "^1.7.4",
     "proxyquire-universal": "^1.0.8",
@@ -67,7 +69,7 @@
     "browserify-versionify": "^1.0.6",
     "lie": "^3.0.2",
     "sort-by": "^1.1.1",
-    "vastacular": "^0.2.0"
+    "vastacular": "git+ssh://git@github.com/pulsepointinc/vastacular.git"
   },
   "browserify": {
     "transform": [

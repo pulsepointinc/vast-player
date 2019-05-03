@@ -3,5 +3,6 @@
     "browser": true,
     "browserify": true,
     "node": false,
-    "devel": false
+    "devel": true,
+    "maxlen": 120
 }

@@ -7,7 +7,7 @@ var EVENTS = require('../../lib/enums/VPAID_EVENTS');
 
 function noop() {}
 
-describe('VPAID(container)', function() {
+describe('VPAID(slot, videoSlot)', function() {
     var VPAID;
     var stubs;
 
@@ -70,20 +70,25 @@ describe('VPAID(container)', function() {
     });
 
     describe('instance:', function() {
-        var container;
+        var slot, videoSlot;
         var player;
 
         beforeEach(function() {
-            container = document.createElement('div');
-            container.style.width = '800px';
-            container.style.height = '600px';
-            document.body.appendChild(container);
+            slot = document.createElement('div');
+            slot.style.width = '800px';
+            slot.style.height = '600px';
+            document.body.appendChild(slot);
+            videoSlot = document.createElement('video');
+            videoSlot.style.width = '800px';
+            videoSlot.style.height = '600px';
+            document.body.appendChild(videoSlot);
 
-            player = new VPAID(container);
+            player = new VPAID(slot, videoSlot);
         });
 
         afterEach(function() {
-            document.body.removeChild(container);
+            document.body.removeChild(slot);
+            document.body.removeChild(videoSlot);
         });
 
         it('should exist', function() {
@@ -91,9 +96,9 @@ describe('VPAID(container)', function() {
         });
 
         describe('properties:', function() {
-            describe('container:', function() {
-                it('should be the container', function() {
-                    expect(player.container).toBe(container);
+            describe('slot:', function() {
+                it('should be the slot', function() {
+                    expect(player.slot).toBe(slot);
                 });
             });
 
