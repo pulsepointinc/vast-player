@@ -548,7 +548,7 @@ describe('VASTPlayer(slot, videoSlot, config)', function() {
                             }));
 
                             vast.set('ads[0].creatives[0].mediaFiles', vast.filter('ads[0].creatives[0].mediaFiles', function(mediaFile) {
-                                return mediaFile.type !== 'application/javascript';
+                                return mediaFile.type === 'application/x-shockwave-flash';
                             }));
                             expect(vast.find('ads[0].creatives[0].mediaFiles', function(mediaFile) {
                                 return mediaFile.apiFramework === 'VPAID' && mediaFile.type === 'application/javascript';

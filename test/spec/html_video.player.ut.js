@@ -61,6 +61,8 @@ describe('HTMLVideo(slot, videoSlot)', function() {
             document.body.appendChild(slot);
 
             videoSlot = document.createElement('video');
+            Object.defineProperty(videoSlot, 'paused', {value:true, writable:true});
+
             videoSlot.style.width = '800px';
             videoSlot.style.height = '600px';
             document.body.appendChild(videoSlot);
@@ -99,8 +101,10 @@ describe('HTMLVideo(slot, videoSlot)', function() {
 
                 describe('after the video is loaded', function() {
                     beforeEach(function() {
-                        player.videoSlot.currentTime = 10;
-                        player.videoSlot.duration = 30;
+                        // player.videoSlot.currentTime = 10;
+                        spyOnProperty(player.videoSlot, 'currentTime', 'get').and.returnValue(10);
+
+                        spyOnProperty(player.videoSlot, 'duration', 'get').and.returnValue(30);
                         player.loadedMetadata = true;
                     });
 
@@ -119,7 +123,8 @@ describe('HTMLVideo(slot, videoSlot)', function() {
 
                 describe('after the video is loaded', function() {
                     beforeEach(function() {
-                        player.videoSlot.duration = 60;
+                        spyOnProperty(player.videoSlot, 'duration', 'get').and.returnValue(60);
+
                         player.loadedMetadata = true;
                     });
 
@@ -181,11 +186,9 @@ describe('HTMLVideo(slot, videoSlot)', function() {
             describe('load(mediaFiles)', function() {
                 var mediaFiles;
                 var success, failure;
-                // var video;
                 var result;
 
                 beforeEach(function() {
-                    // var createElement = document.createElement;
 
                     mediaFiles = [
                         { type: 'video/x-flv', width: 300, height: 200, uri: 'http://videos.com/video1.flv' },
@@ -205,44 +208,16 @@ describe('HTMLVideo(slot, videoSlot)', function() {
                     success = jasmine.createSpy('success()');
                     failure = jasmine.createSpy('failure()');
 
-                    // spyOn(document, 'createElement').and.callFake(function(tagName) {
-                    //     var element = createElement.apply(document, arguments);
-
-                        // if (tagName.toUpperCase() === 'VIDEO') {
-                        //     element.play = jasmine.createSpy('video.play()');
-                        // }
-
-                        // return element;
-                    // });
-                    // player.videoSlot = document.createElement('video');
-                    // player.videoSlot.play = jasmine.createSpy('video.play()');
-                    // document.body.appendChild(player.videoSlot);
-
                     result = player.load(mediaFiles);
                     result.then(success, failure);
 
-                    // video = container.children[0];
                 });
 
-                // afterEach(function () {
-                //     document.body.removeChild(player.videoSlot);
-                // });
 
                 it('should return a Promise', function() {
                     expect(result).toEqual(jasmine.any(LiePromise));
                 });
 
-                // it('should create a <video> in the container', function() {
-                //     expect(container.children.length).toBe(1);
-                //     expect(video.tagName).toBe('VIDEO');
-                //     expect(video.getAttribute('webkit-playsinline')).toBe('true');
-                //     expect(video.style.width).toBe('100%');
-                //     expect(video.style.height).toBe('100%');
-                //     expect(video.style.display).toBe('block');
-                //     expect(video.style.objectFit).toBe('contain');
-                //     expect(mediaFiles.map(function(mediaFile) { return mediaFile.uri; })).toContain(video.src);
-                //     expect(video.preload).toBe('auto');
-                // });
 
                 describe('when the video emits "playing"', function() {
                     var AdImpression;
@@ -290,7 +265,7 @@ describe('HTMLVideo(slot, videoSlot)', function() {
                         AdClickThru = jasmine.createSpy('AdClickThru()');
                         player.on(VPAID_EVENTS.AdClickThru, AdClickThru);
 
-                        trigger(player.videoSlot, 'click');
+                        trigger(player.slot, 'click');
                     });
 
                     it('should emit "AdClickThru"', function() {
@@ -318,9 +293,6 @@ describe('HTMLVideo(slot, videoSlot)', function() {
                         expect(AdLoaded).toHaveBeenCalled();
                     });
 
-                    // it('should save a reference to the video', function() {
-                    //     expect(player.video).toBe(video);
-                    // });
 
                     it('should create a tracker for the video', function() {
                         expect(HTMLVideoTracker).toHaveBeenCalledWith(player.videoSlot);
@@ -381,7 +353,7 @@ describe('HTMLVideo(slot, videoSlot)', function() {
                     });
 
                     it('should emit "AdError"', function() {
-                        expect(AdError).toHaveBeenCalledWith(player.videoSlot.error.message);
+                        expect(AdError).toHaveBeenCalledWith(player.videoSlot.error);
                     });
 
                     it('should reject the Promise', function() {
@@ -642,15 +614,9 @@ describe('HTMLVideo(slot, videoSlot)', function() {
                         player.on(VPAID_EVENTS.AdStopped, AdStopped);
 
                         player.loadedMetadata = true;
-                        // player.videoSlot = document.createElement('video');
-                        // container.appendChild(player.video);
 
                         player.stopAd().then(success, failure).then(done, done.fail);
                     });
-
-                    // it('should remove the video from the DOM', function() {
-                    //     expect(container.contains(player.video)).toBe(false, 'Video is still in the DOM!');
-                    // });
 
                     it('should emit AdStopped', function() {
                         expect(AdStopped).toHaveBeenCalled();
@@ -704,6 +670,7 @@ describe('HTMLVideo(slot, videoSlot)', function() {
                             player.videoSlot.pause.calls.reset();
 
                             player.videoSlot.paused = true;
+
 
                             result = player.pauseAd();
                             result.then(success, failure);
@@ -766,6 +733,8 @@ describe('HTMLVideo(slot, videoSlot)', function() {
                         player.load([{ type: 'video/mp4', bitrate: 100, width: 500, height: 400, uri: 'http://videos.com/video3.mp4' }]).then(function(player) {
                             player.videoSlot.play = jasmine.createSpy('video.play()');
                             player.videoSlot.paused = true;
+
+
                         }).then(done, done.fail);
                         trigger(player.videoSlot, HTML_MEDIA_EVENTS.LOADEDMETADATA);
                     });

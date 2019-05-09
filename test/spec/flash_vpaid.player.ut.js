@@ -153,7 +153,7 @@ describe('FlashVPAID(slot, videoSlot, swfURI)', function() {
                     expect(object.style.display).toBe('block');
                     expect(object.style.width).toBe('100%');
                     expect(object.style.height).toBe('100%');
-                    expect(object.style.border).toBe('none');
+                    expect(object.style.border).toContain('none');
                     expect(object.style.opacity).toBe('0');
                     expect(object.querySelector('param[name="movie"]').getAttribute('value')).toBe(swfURI, 'param[movie]');
                     expect(object.querySelector('param[name="flashvars"]').getAttribute('value')).toBe(querystring.stringify({
