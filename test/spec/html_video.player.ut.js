@@ -568,23 +568,6 @@ describe('HTMLVideo(slot, videoSlot)', function() {
                         });
                     });
 
-                    describe('and after is has played', function() {
-                        beforeEach(function(done) {
-                            trigger(player.videoSlot, HTML_MEDIA_EVENTS.PLAYING);
-
-                            result = player.startAd();
-                            result.then(success, failure);
-                            result.then(done, done);
-                        });
-
-                        it('should not play the video', function() {
-                            expect(player.videoSlot.play).not.toHaveBeenCalled();
-                        });
-
-                        it('should reject the Promise', function() {
-                            expect(failure).toHaveBeenCalledWith(new Error('The ad has already been started.'));
-                        });
-                    });
                 });
             });
 
