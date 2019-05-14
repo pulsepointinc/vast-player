@@ -55,17 +55,6 @@ describe('VASTPlayer(slot, videoSlot, config)', function() {
         expect(VASTPlayer.name).toEqual('VASTPlayer');
     });
 
-    describe('static:', function() {
-        describe('properties:', function() {
-            describe('vpaidSWFLocation', function() {
-                it('should be "https://cdn.jsdelivr.net/npm/vast-player@__VERSION__/dist/vast-player--vpaid.swf"', function() {
-                    expect(VASTPlayer.vpaidSWFLocation).toBe('https://cdn.jsdelivr.net/npm/vast-player@__VERSION__/dist/vast-player--vpaid.swf');
-                    expect('__VERSION__').toBe(require('../../package.json').version, 'browserify-versionify is not working.');
-                });
-            });
-        });
-    });
-
     describe('instance:', function() {
         var player;
         var slot, videoSlot, config;
