@@ -171,15 +171,6 @@ describe('JavaScriptVPAID(slot, videoSlot)', function() {
                     expect(script.src).toBe(mediaFiles[0].uri);
                 });
 
-                // it('should create a <video> in the <body> of the <iframe>', function() {
-                //     expect(iframe.contentWindow.document.body.querySelector('video')).not.toBeNull();
-                //     expect(video.getAttribute('webkit-playsinline')).toBe('true');
-                //     expect(video.style.display).toBe('block');
-                //     expect(video.style.width).toBe('100%');
-                //     expect(video.style.height).toBe('100%');
-                //     expect(video.style.objectFit).toBe('contain');
-                // });
-
                 describe('when the script loads', function() {
                     var vpaid;
 
@@ -212,37 +203,6 @@ describe('JavaScriptVPAID(slot, videoSlot)', function() {
                                 });
                             });
 
-                            // describe('when the slot is resized', function() {
-                            //     beforeEach(function(done) {
-                            //         spyOn(player, 'resizeAd').and.returnValue(LiePromise.resolve(player));
-                            //
-                            //         slot.style.width = '1024px';
-                            //         slot.style.height = '768px';
-                            //
-                            //         setTimeout(done, 200);
-                            //         // process.nextTick(done);
-                            //     });
-                            //
-                            //     it('should resize the ad', function() {
-                            //         expect(player.resizeAd).toHaveBeenCalledWith(1024, 768, 'normal');
-                            //     });
-                            //
-                            //     describe('after the ad is stopped', function() {
-                            //         beforeEach(function(done) {
-                            //             player.resizeAd.calls.reset();
-                            //             player.emit(VPAID_EVENTS.AdStopped);
-                            //
-                            //             slot.style.width = '800px';
-                            //             slot.style.height = '600px';
-                            //
-                            //             process.nextTick(done);
-                            //         });
-                            //
-                            //         it('should not resize the ad', function() {
-                            //             expect(player.resizeAd).not.toHaveBeenCalled();
-                            //         });
-                            //     });
-                            // });
 
                             describe('when AdLoaded is emitted', function() {
                                 beforeEach(function(done) {
