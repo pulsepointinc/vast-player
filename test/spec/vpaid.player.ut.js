@@ -125,7 +125,7 @@ describe('VPAID(slot, videoSlot)', function() {
                     });
 
                     it('should throw an Error', function() {
-                        expect(function() { noop(player.adLinear); }).toThrow(new Error('Ad has not been loaded.'));
+                        expect(function() { noop(player.adLinear); }).toThrow(new Error('VPAIDPlayerNotReady:getAdLinear'));
                     });
                 });
 
@@ -156,7 +156,7 @@ describe('VPAID(slot, videoSlot)', function() {
                     });
 
                     it('should throw an Error', function() {
-                        expect(function() { noop(player.adWidth); }).toThrow(new Error('Ad has not been loaded.'));
+                        expect(function() { noop(player.adWidth); }).toThrow(new Error('VPAIDPlayerNotReady:getAdWidth'));
                     });
                 });
 
@@ -187,7 +187,7 @@ describe('VPAID(slot, videoSlot)', function() {
                     });
 
                     it('should throw an Error', function() {
-                        expect(function() { noop(player.adHeight); }).toThrow(new Error('Ad has not been loaded.'));
+                        expect(function() { noop(player.adHeight); }).toThrow(new Error('VPAIDPlayerNotReady:getAdHeight'));
                     });
                 });
 
@@ -218,7 +218,7 @@ describe('VPAID(slot, videoSlot)', function() {
                     });
 
                     it('should throw an Error', function() {
-                        expect(function() { noop(player.adExpanded); }).toThrow(new Error('Ad has not been loaded.'));
+                        expect(function() { noop(player.adExpanded); }).toThrow(new Error('VPAIDPlayerNotReady:getAdExpanded'));
                     });
                 });
 
@@ -249,7 +249,7 @@ describe('VPAID(slot, videoSlot)', function() {
                     });
 
                     it('should throw an Error', function() {
-                        expect(function() { noop(player.adSkippableState); }).toThrow(new Error('Ad has not been loaded.'));
+                        expect(function() { noop(player.adSkippableState); }).toThrow(new Error('VPAIDPlayerNotReady:getAdSkippableState'));
                     });
                 });
 
@@ -280,7 +280,7 @@ describe('VPAID(slot, videoSlot)', function() {
                     });
 
                     it('should throw an Error', function() {
-                        expect(function() { noop(player.adRemainingTime); }).toThrow(new Error('Ad has not been loaded.'));
+                        expect(function() { noop(player.adRemainingTime); }).toThrow(new Error('VPAIDPlayerNotReady:getAdRemainingTime'));
                     });
                 });
 
@@ -311,7 +311,7 @@ describe('VPAID(slot, videoSlot)', function() {
                     });
 
                     it('should throw an Error', function() {
-                        expect(function() { noop(player.adDuration); }).toThrow(new Error('Ad has not been loaded.'));
+                        expect(function() { noop(player.adDuration); }).toThrow(new Error('VPAIDPlayerNotReady:getAdDuration'));
                     });
                 });
 
@@ -343,13 +343,13 @@ describe('VPAID(slot, videoSlot)', function() {
 
                     describe('getting', function() {
                         it('should throw an Error', function() {
-                            expect(function() { noop(player.adVolume); }).toThrow(new Error('Ad has not been loaded.'));
+                            expect(function() { noop(player.adVolume); }).toThrow(new Error('VPAIDPlayerNotReady:getAdVolume'));
                         });
                     });
 
                     describe('setting', function() {
                         it('should throw an Error', function() {
-                            expect(function() { player.adVolume = 0.5; }).toThrow(new Error('Ad has not been loaded.'));
+                            expect(function() { player.adVolume = 0.5; }).toThrow(new Error('VPAIDPlayerNotReady:setAdVolume'));
                         });
                     });
                 });
@@ -395,7 +395,7 @@ describe('VPAID(slot, videoSlot)', function() {
                     });
 
                     it('should throw an Error', function() {
-                        expect(function() { noop(player.adCompanions); }).toThrow(new Error('Ad has not been loaded.'));
+                        expect(function() { noop(player.adCompanions); }).toThrow(new Error('VPAIDPlayerNotReady:getAdCompanions'));
                     });
                 });
 
@@ -439,7 +439,7 @@ describe('VPAID(slot, videoSlot)', function() {
                     });
 
                     it('should throw an Error', function() {
-                        expect(function() { noop(player.adIcons); }).toThrow(new Error('Ad has not been loaded.'));
+                        expect(function() { noop(player.adIcons); }).toThrow(new Error('VPAIDPlayerNotReady:getAdIcons'));
                     });
                 });
 
@@ -488,7 +488,7 @@ describe('VPAID(slot, videoSlot)', function() {
                     });
 
                     it('should return a rejected Promise', function() {
-                        expect(failure).toHaveBeenCalledWith(new Error('Ad has not been loaded.'));
+                        expect(failure).toHaveBeenCalledWith(new Error('VPAIDPlayerNotReady:resizeAd'));
                     });
                 });
 
@@ -529,7 +529,7 @@ describe('VPAID(slot, videoSlot)', function() {
                     });
 
                     it('should return a rejected Promise', function() {
-                        expect(failure).toHaveBeenCalledWith(new Error('Ad has not been loaded.'));
+                        expect(failure).toHaveBeenCalledWith(new Error('VPAIDPlayerNotReady:startAd'));
                     });
                 });
 
@@ -570,7 +570,7 @@ describe('VPAID(slot, videoSlot)', function() {
                     });
 
                     it('should return a rejected Promise', function() {
-                        expect(failure).toHaveBeenCalledWith(new Error('Ad has not been loaded.'));
+                        expect(failure).toHaveBeenCalledWith(new Error('VPAIDPlayerNotReady:stopAd'));
                     });
                 });
 
@@ -611,7 +611,7 @@ describe('VPAID(slot, videoSlot)', function() {
                     });
 
                     it('should return a rejected Promise', function() {
-                        expect(failure).toHaveBeenCalledWith(new Error('Ad has not been loaded.'));
+                        expect(failure).toHaveBeenCalledWith(new Error('VPAIDPlayerNotReady:pauseAd'));
                     });
                 });
 
@@ -652,7 +652,7 @@ describe('VPAID(slot, videoSlot)', function() {
                     });
 
                     it('should return a rejected Promise', function() {
-                        expect(failure).toHaveBeenCalledWith(new Error('Ad has not been loaded.'));
+                        expect(failure).toHaveBeenCalledWith(new Error('VPAIDPlayerNotReady:resumeAd'));
                     });
                 });
 
@@ -693,7 +693,7 @@ describe('VPAID(slot, videoSlot)', function() {
                     });
 
                     it('should return a rejected Promise', function() {
-                        expect(failure).toHaveBeenCalledWith(new Error('Ad has not been loaded.'));
+                        expect(failure).toHaveBeenCalledWith(new Error('VPAIDPlayerNotReady:expandAd'));
                     });
                 });
 
@@ -734,7 +734,7 @@ describe('VPAID(slot, videoSlot)', function() {
                     });
 
                     it('should return a rejected Promise', function() {
-                        expect(failure).toHaveBeenCalledWith(new Error('Ad has not been loaded.'));
+                        expect(failure).toHaveBeenCalledWith(new Error('VPAIDPlayerNotReady:collapseAd'));
                     });
                 });
 
@@ -775,7 +775,7 @@ describe('VPAID(slot, videoSlot)', function() {
                     });
 
                     it('should return a rejected Promise', function() {
-                        expect(failure).toHaveBeenCalledWith(new Error('Ad has not been loaded.'));
+                        expect(failure).toHaveBeenCalledWith(new Error('VPAIDPlayerNotReady:skipAd'));
                     });
                 });
 

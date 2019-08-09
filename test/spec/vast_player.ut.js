@@ -192,13 +192,13 @@ describe('VASTPlayer(slot, videoSlot, config)', function() {
 
                         describe('getting', function() {
                             it('should throw an Error', function() {
-                                expect(function() { return player[property]; }).toThrow(new Error('VASTPlayer not ready.'));
+                                expect(function() { return player[property]; }).toThrow(new Error('VASTPlayerNotReady:'+property));
                             });
                         });
 
                         describe('setting', function() {
                             it('should throw an Error', function() {
-                                expect(function() { player[property] = {}; }).toThrow(new Error('VASTPlayer not ready.'));
+                                expect(function() { player[property] = {}; }).toThrow(new Error('VASTPlayerNotReady:'+property));
                             });
                         });
                     });
@@ -654,7 +654,7 @@ describe('VASTPlayer(slot, videoSlot, config)', function() {
                             });
 
                             it('should return a rejected promise', function() {
-                                expect(failure).toHaveBeenCalledWith(new Error('VASTPlayer not ready.'));
+                                expect(failure).toHaveBeenCalledWith(new Error('VASTPlayerNotReady:' + method));
                             });
                         });
 
