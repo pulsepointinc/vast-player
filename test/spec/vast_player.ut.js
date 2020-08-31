@@ -9,7 +9,7 @@ var FlashVPAID = require('../../lib/players/FlashVPAID');
 var HTMLVideo = require('../../lib/players/HTMLVideo');
 var EVENTS = require('../../lib/enums/VPAID_EVENTS');
 
-describe('VASTPlayer(container, config)', function() {
+describe('VASTPlayer(slot, videoSlot, config)', function() {
     var VASTPlayer;
     var EventProxy, PixelReporter;
     var stubs;
@@ -55,26 +55,19 @@ describe('VASTPlayer(container, config)', function() {
         expect(VASTPlayer.name).toEqual('VASTPlayer');
     });
 
-    describe('static:', function() {
-        describe('properties:', function() {
-            describe('vpaidSWFLocation', function() {
-                it('should be "https://cdn.jsdelivr.net/npm/vast-player@__VERSION__/dist/vast-player--vpaid.swf"', function() {
-                    expect(VASTPlayer.vpaidSWFLocation).toBe('https://cdn.jsdelivr.net/npm/vast-player@__VERSION__/dist/vast-player--vpaid.swf');
-                    expect('__VERSION__').toBe(require('../../package.json').version, 'browserify-versionify is not working.');
-                });
-            });
-        });
-    });
-
     describe('instance:', function() {
         var player;
-        var container, config;
+        var slot, videoSlot, config;
 
         beforeEach(function() {
-            container = document.createElement('div');
-            container.style.width = '800px';
-            container.style.height = '600px';
-            document.body.appendChild(container);
+            slot = document.createElement('div');
+            slot.style.width = '800px';
+            slot.style.height = '600px';
+            document.body.appendChild(slot);
+            videoSlot = document.createElement('video');
+            videoSlot.style.width = '800px';
+            videoSlot.style.height = '600px';
+            document.body.appendChild(videoSlot);
 
             config = {
                 vast: {
@@ -87,11 +80,12 @@ describe('VASTPlayer(container, config)', function() {
                 }
             };
 
-            player = new VASTPlayer(container, config);
+            player = new VASTPlayer(slot, videoSlot, config);
         });
 
         afterEach(function() {
-            document.body.removeChild(container);
+            document.body.removeChild(slot);
+            document.body.removeChild(videoSlot);
         });
 
         it('should be an EventEmitter', function() {
@@ -99,14 +93,14 @@ describe('VASTPlayer(container, config)', function() {
         });
 
         describe('properties:', function() {
-            describe('container', function() {
+            describe('slot', function() {
                 it('should be the provided container', function() {
-                    expect(player.container).toBe(container);
+                    expect(player.slot).toBe(slot);
                 });
 
                 it('should not be settable', function() {
-                    player.container = 'changed';
-                    expect(player.container).toBe(container);
+                    player.slot = 'changed';
+                    expect(player.slot).toBe(slot);
                 });
             });
 
@@ -125,7 +119,7 @@ describe('VASTPlayer(container, config)', function() {
                     beforeEach(function() {
                         config = {};
 
-                        player = new VASTPlayer(container, config);
+                        player = new VASTPlayer(slot, videoSlot, config);
                     });
 
                     it('should be given defaults', function() {
@@ -144,7 +138,7 @@ describe('VASTPlayer(container, config)', function() {
 
                 describe('if a config is not specified', function() {
                     beforeEach(function() {
-                        player = new VASTPlayer(container);
+                        player = new VASTPlayer(slot, videoSlot);
                     });
 
                     it('should be given defaults', function() {
@@ -198,13 +192,13 @@ describe('VASTPlayer(container, config)', function() {
 
                         describe('getting', function() {
                             it('should throw an Error', function() {
-                                expect(function() { return player[property]; }).toThrow(new Error('VASTPlayer not ready.'));
+                                expect(function() { return player[property]; }).toThrow(new Error('VASTPlayerNotReady:'+property));
                             });
                         });
 
                         describe('setting', function() {
                             it('should throw an Error', function() {
-                                expect(function() { player[property] = {}; }).toThrow(new Error('VASTPlayer not ready.'));
+                                expect(function() { player[property] = {}; }).toThrow(new Error('VASTPlayerNotReady:'+property));
                             });
                         });
                     });
@@ -369,7 +363,7 @@ describe('VASTPlayer(container, config)', function() {
 
                         it('should create a HTMLVideo player', function() {
                             expect(player.__private__.player).toEqual(jasmine.any(HTMLVideo));
-                            expect(player.__private__.player.container).toBe(container);
+                            expect(player.__private__.player.slot).toBe(slot);
                         });
 
                         it('should proxy VPAID events from the player to itself', function() {
@@ -404,8 +398,9 @@ describe('VASTPlayer(container, config)', function() {
                                 ready = jasmine.createSpy('ready()');
                                 player.on('ready', ready);
 
-                                player.__private__.player.video = document.createElement('video');
-                                player.__private__.player.video.volume = 1;
+                                player.__private__.player.videoSlot = document.createElement('video');
+                                player.__private__.player.loadedMetadata = true;
+                                player.__private__.player.videoSlot.volume = 1;
 
                                 resolvePlayerLoad(player.__private__.player);
                                 result.then(done, done);
@@ -452,7 +447,7 @@ describe('VASTPlayer(container, config)', function() {
 
                         it('should create a JavaScriptVPAID player', function() {
                             expect(player.__private__.player).toEqual(jasmine.any(JavaScriptVPAID));
-                            expect(player.__private__.player.container).toBe(container);
+                            expect(player.__private__.player.slot).toBe(slot);
                         });
 
                         it('should load() the JavaScriptVPAID() player', function() {
@@ -522,14 +517,14 @@ describe('VASTPlayer(container, config)', function() {
                                     return mediaFile.apiFramework === 'VPAID' && mediaFile.type === 'application/javascript';
                                 }).type = 'application/x-javascript';
 
-                                player = new VASTPlayer(container);
+                                player = new VASTPlayer(slot, videoSlot);
                                 player.load(uri);
                                 process.nextTick(done);
                             });
 
                             it('should create a JavaScriptVPAID player', function() {
                                 expect(player.__private__.player).toEqual(jasmine.any(JavaScriptVPAID));
-                                expect(player.__private__.player.container).toBe(container);
+                                expect(player.__private__.player.slot).toBe(slot);
                             });
                         });
                     });
@@ -542,7 +537,7 @@ describe('VASTPlayer(container, config)', function() {
                             }));
 
                             vast.set('ads[0].creatives[0].mediaFiles', vast.filter('ads[0].creatives[0].mediaFiles', function(mediaFile) {
-                                return mediaFile.type !== 'application/javascript';
+                                return mediaFile.type === 'application/x-shockwave-flash';
                             }));
                             expect(vast.find('ads[0].creatives[0].mediaFiles', function(mediaFile) {
                                 return mediaFile.apiFramework === 'VPAID' && mediaFile.type === 'application/javascript';
@@ -560,7 +555,7 @@ describe('VASTPlayer(container, config)', function() {
 
                         it('should create a FlashVPAID() player', function() {
                             expect(player.__private__.player).toEqual(jasmine.any(FlashVPAID));
-                            expect(player.__private__.player.container).toBe(container);
+                            expect(player.__private__.player.slot).toBe(slot);
                         });
 
                         it('should load() the FlashVPAID() player', function() {
@@ -629,7 +624,7 @@ describe('VASTPlayer(container, config)', function() {
 
             describe('for playback', function() {
                 beforeEach(function() {
-                    player.__private__.player = new HTMLVideo(container);
+                    player.__private__.player = new HTMLVideo(slot, videoSlot);
                 });
 
                 ['startAd', 'stopAd', 'pauseAd', 'resumeAd'].forEach(function(method) {
@@ -659,7 +654,7 @@ describe('VASTPlayer(container, config)', function() {
                             });
 
                             it('should return a rejected promise', function() {
-                                expect(failure).toHaveBeenCalledWith(new Error('VASTPlayer not ready.'));
+                                expect(failure).toHaveBeenCalledWith(new Error('VASTPlayerNotReady:' + method));
                             });
                         });
 

@@ -6,7 +6,7 @@ var LiePromise = require('lie');
 var VPAID_EVENTS = require('../../lib/enums/VPAID_EVENTS');
 var HTML_MEDIA_EVENTS = require('../../lib/enums/HTML_MEDIA_EVENTS');
 
-describe('HTMLVideo(container)', function() {
+describe('HTMLVideo(slot, videoSlot)', function() {
     var HTMLVideo;
     var environment, HTMLVideoTracker, EventProxy;
     var stubs;
@@ -50,20 +50,29 @@ describe('HTMLVideo(container)', function() {
     });
 
     describe('instance:', function() {
-        var container;
+        var slot;
+        var videoSlot;
         var player;
 
         beforeEach(function() {
-            container = document.createElement('div');
-            container.style.width = '800px';
-            container.style.height = '600px';
-            document.body.appendChild(container);
+            slot = document.createElement('div');
+            slot.style.width = '800px';
+            slot.style.height = '600px';
+            document.body.appendChild(slot);
 
-            player = new HTMLVideo(container);
+            videoSlot = document.createElement('video');
+            Object.defineProperty(videoSlot, 'paused', {value:true, writable:true});
+
+            videoSlot.style.width = '800px';
+            videoSlot.style.height = '600px';
+            document.body.appendChild(videoSlot);
+
+            player = new HTMLVideo(slot, videoSlot);
         });
 
         afterEach(function() {
-            document.body.removeChild(container);
+            document.body.removeChild(slot);
+            document.body.removeChild(videoSlot);
         });
 
         it('should exist', function() {
@@ -71,15 +80,15 @@ describe('HTMLVideo(container)', function() {
         });
 
         describe('properties:', function() {
-            describe('container', function() {
+            describe('slot', function() {
                 it('should be the container', function() {
-                    expect(player.container).toBe(container);
+                    expect(player.slot).toBe(slot);
                 });
             });
 
             describe('video', function() {
-                it('should be null', function() {
-                    expect(player.video).toBeNull();
+                it('should be videoSlot', function() {
+                    expect(player.videoSlot).toBe(videoSlot);
                 });
             });
 
@@ -92,9 +101,11 @@ describe('HTMLVideo(container)', function() {
 
                 describe('after the video is loaded', function() {
                     beforeEach(function() {
-                        player.video = document.createElement('video');
-                        player.video.currentTime = 10;
-                        player.video.duration = 30;
+                        // player.videoSlot.currentTime = 10;
+                        spyOnProperty(player.videoSlot, 'currentTime', 'get').and.returnValue(10);
+
+                        spyOnProperty(player.videoSlot, 'duration', 'get').and.returnValue(30);
+                        player.loadedMetadata = true;
                     });
 
                     it('should be the duration - currentTime', function() {
@@ -112,8 +123,9 @@ describe('HTMLVideo(container)', function() {
 
                 describe('after the video is loaded', function() {
                     beforeEach(function() {
-                        player.video = document.createElement('video');
-                        player.video.duration = 60;
+                        spyOnProperty(player.videoSlot, 'duration', 'get').and.returnValue(60);
+
+                        player.loadedMetadata = true;
                     });
 
                     it('should be the duration', function() {
@@ -139,8 +151,8 @@ describe('HTMLVideo(container)', function() {
 
                 describe('after the video is loaded', function() {
                     beforeEach(function() {
-                        player.video = document.createElement('video');
-                        player.video.volume = 0.75;
+                        player.videoSlot.volume = 0.75;
+                        player.loadedMetadata = true;
                     });
 
                     describe('getting', function() {
@@ -155,7 +167,7 @@ describe('HTMLVideo(container)', function() {
                         });
 
                         it('should set the volume', function() {
-                            expect(player.video.volume).toBe(0.2);
+                            expect(player.videoSlot.volume).toBe(0.2);
                         });
                     });
                 });
@@ -174,11 +186,9 @@ describe('HTMLVideo(container)', function() {
             describe('load(mediaFiles)', function() {
                 var mediaFiles;
                 var success, failure;
-                var video;
                 var result;
 
                 beforeEach(function() {
-                    var createElement = document.createElement;
 
                     mediaFiles = [
                         { type: 'video/x-flv', width: 300, height: 200, uri: 'http://videos.com/video1.flv' },
@@ -198,37 +208,16 @@ describe('HTMLVideo(container)', function() {
                     success = jasmine.createSpy('success()');
                     failure = jasmine.createSpy('failure()');
 
-                    spyOn(document, 'createElement').and.callFake(function(tagName) {
-                        var element = createElement.apply(document, arguments);
-
-                        if (tagName.toUpperCase() === 'VIDEO') {
-                            element.play = jasmine.createSpy('video.play()');
-                        }
-
-                        return element;
-                    });
-
                     result = player.load(mediaFiles);
                     result.then(success, failure);
 
-                    video = container.children[0];
                 });
+
 
                 it('should return a Promise', function() {
                     expect(result).toEqual(jasmine.any(LiePromise));
                 });
 
-                it('should create a <video> in the container', function() {
-                    expect(container.children.length).toBe(1);
-                    expect(video.tagName).toBe('VIDEO');
-                    expect(video.getAttribute('webkit-playsinline')).toBe('true');
-                    expect(video.style.width).toBe('100%');
-                    expect(video.style.height).toBe('100%');
-                    expect(video.style.display).toBe('block');
-                    expect(video.style.objectFit).toBe('contain');
-                    expect(mediaFiles.map(function(mediaFile) { return mediaFile.uri; })).toContain(video.src);
-                    expect(video.preload).toBe('auto');
-                });
 
                 describe('when the video emits "playing"', function() {
                     var AdImpression;
@@ -237,7 +226,7 @@ describe('HTMLVideo(container)', function() {
                         AdImpression = jasmine.createSpy('AdImpression()');
                         player.on(VPAID_EVENTS.AdImpression, AdImpression);
 
-                        trigger(video, HTML_MEDIA_EVENTS.PLAYING);
+                        trigger(player.videoSlot, HTML_MEDIA_EVENTS.PLAYING);
                     });
 
                     it('should emit "AdImpression"', function() {
@@ -248,7 +237,7 @@ describe('HTMLVideo(container)', function() {
                         beforeEach(function() {
                             AdImpression.calls.reset();
 
-                            trigger(video, HTML_MEDIA_EVENTS.PLAYING);
+                            trigger(player.videoSlot, HTML_MEDIA_EVENTS.PLAYING);
                         });
 
                         it('should not emit "AdImpression" again', function() {
@@ -261,7 +250,7 @@ describe('HTMLVideo(container)', function() {
                     beforeEach(function() {
                         spyOn(player, 'stopAd').and.callThrough();
 
-                        trigger(video, HTML_MEDIA_EVENTS.ENDED);
+                        trigger(player.videoSlot, HTML_MEDIA_EVENTS.ENDED);
                     });
 
                     it('should call stopAd() on itself', function() {
@@ -276,7 +265,7 @@ describe('HTMLVideo(container)', function() {
                         AdClickThru = jasmine.createSpy('AdClickThru()');
                         player.on(VPAID_EVENTS.AdClickThru, AdClickThru);
 
-                        trigger(video, 'click');
+                        trigger(player.slot, 'click');
                     });
 
                     it('should emit "AdClickThru"', function() {
@@ -292,8 +281,8 @@ describe('HTMLVideo(container)', function() {
                         AdLoaded = jasmine.createSpy('AdLoaded');
                         player.on(VPAID_EVENTS.AdLoaded, AdLoaded);
 
-                        video.duration = 60;
-                        trigger(video, HTML_MEDIA_EVENTS.LOADEDMETADATA);
+                        player.videoSlot.duration = 60;
+                        trigger(player.videoSlot, HTML_MEDIA_EVENTS.LOADEDMETADATA);
 
                         tracker = HTMLVideoTracker.calls.mostRecent().returnValue;
                         proxy = EventProxy.calls.mostRecent().returnValue;
@@ -304,12 +293,9 @@ describe('HTMLVideo(container)', function() {
                         expect(AdLoaded).toHaveBeenCalled();
                     });
 
-                    it('should save a reference to the video', function() {
-                        expect(player.video).toBe(video);
-                    });
 
                     it('should create a tracker for the video', function() {
-                        expect(HTMLVideoTracker).toHaveBeenCalledWith(video);
+                        expect(HTMLVideoTracker).toHaveBeenCalledWith(player.videoSlot);
                     });
 
                     it('should proxy from the tracker to the player', function() {
@@ -329,7 +315,7 @@ describe('HTMLVideo(container)', function() {
                             AdDurationChange = jasmine.createSpy('AdDurationChange()');
                             player.on(VPAID_EVENTS.AdDurationChange, AdDurationChange);
 
-                            trigger(video, HTML_MEDIA_EVENTS.DURATIONCHANGE);
+                            trigger(player.videoSlot, HTML_MEDIA_EVENTS.DURATIONCHANGE);
                         });
 
                         it('should emit "AdDurationChange"', function() {
@@ -344,7 +330,7 @@ describe('HTMLVideo(container)', function() {
                             AdVolumeChange = jasmine.createSpy('AdVolumeChange()');
                             player.on(VPAID_EVENTS.AdVolumeChange, AdVolumeChange);
 
-                            trigger(video, HTML_MEDIA_EVENTS.VOLUMECHANGE);
+                            trigger(player.videoSlot, HTML_MEDIA_EVENTS.VOLUMECHANGE);
                         });
 
                         it('should emit "AdVolumeChange"', function() {
@@ -360,30 +346,30 @@ describe('HTMLVideo(container)', function() {
                         AdError = jasmine.createSpy('AdError()');
                         player.on(VPAID_EVENTS.AdError, AdError);
 
-                        video.error = new Error('It didn\'t play...');
-                        trigger(video, HTML_MEDIA_EVENTS.ERROR);
+                        player.videoSlot.error = new Error('It didn\'t play...');
+                        trigger(player.videoSlot, HTML_MEDIA_EVENTS.ERROR);
 
                         result.then(done, done);
                     });
 
                     it('should emit "AdError"', function() {
-                        expect(AdError).toHaveBeenCalledWith(video.error.message);
+                        expect(AdError).toHaveBeenCalledWith(player.videoSlot.error);
                     });
 
                     it('should reject the Promise', function() {
-                        expect(failure).toHaveBeenCalledWith(video.error);
+                        expect(failure).toHaveBeenCalledWith(player.videoSlot.error);
                     });
                 });
 
                 describe('when choosing a video to play', function() {
                     function load(width, height) {
-                        container.innerHTML = '';
-                        container.style.width = width + 'px';
-                        container.style.height = height + 'px';
+                        player.slot.innerHTML = '';
+                        player.slot.style.width = width + 'px';
+                        player.slot.style.height = height + 'px';
 
                         result = player.load(mediaFiles);
 
-                        return container.children[0];
+                        return player.videoSlot;
                     }
 
                     beforeEach(function() {
@@ -546,9 +532,9 @@ describe('HTMLVideo(container)', function() {
 
                     beforeEach(function(done) {
                         player.load([{ type: 'video/mp4', bitrate: 100, width: 500, height: 400, uri: 'http://videos.com/video3.mp4' }]).then(function(player) {
-                            player.video.play = jasmine.createSpy('video.play()');
+                            player.videoSlot.play = jasmine.createSpy('video.play()');
                         }).then(done, done.fail);
-                        trigger(container.children[0], HTML_MEDIA_EVENTS.LOADEDMETADATA);
+                        trigger(player.videoSlot, HTML_MEDIA_EVENTS.LOADEDMETADATA);
                     });
 
                     describe('and before it has played', function() {
@@ -558,7 +544,7 @@ describe('HTMLVideo(container)', function() {
                         });
 
                         it('should play the video', function() {
-                            expect(player.video.play).toHaveBeenCalledWith();
+                            expect(player.videoSlot.play).toHaveBeenCalledWith();
                         });
 
                         describe('when the video emits "playing"', function() {
@@ -568,7 +554,7 @@ describe('HTMLVideo(container)', function() {
                                 AdStarted = jasmine.createSpy('AdStarted()');
                                 player.on(VPAID_EVENTS.AdStarted, AdStarted);
 
-                                trigger(player.video, HTML_MEDIA_EVENTS.PLAYING);
+                                trigger(player.videoSlot, HTML_MEDIA_EVENTS.PLAYING);
                                 result.then(done, done);
                             });
 
@@ -582,23 +568,6 @@ describe('HTMLVideo(container)', function() {
                         });
                     });
 
-                    describe('and after is has played', function() {
-                        beforeEach(function(done) {
-                            trigger(player.video, HTML_MEDIA_EVENTS.PLAYING);
-
-                            result = player.startAd();
-                            result.then(success, failure);
-                            result.then(done, done);
-                        });
-
-                        it('should not play the video', function() {
-                            expect(player.video.play).not.toHaveBeenCalled();
-                        });
-
-                        it('should reject the Promise', function() {
-                            expect(failure).toHaveBeenCalledWith(new Error('The ad has already been started.'));
-                        });
-                    });
                 });
             });
 
@@ -627,14 +596,9 @@ describe('HTMLVideo(container)', function() {
                         AdStopped = jasmine.createSpy('AdStopped()');
                         player.on(VPAID_EVENTS.AdStopped, AdStopped);
 
-                        player.video = document.createElement('video');
-                        container.appendChild(player.video);
+                        player.loadedMetadata = true;
 
                         player.stopAd().then(success, failure).then(done, done.fail);
-                    });
-
-                    it('should remove the video from the DOM', function() {
-                        expect(container.contains(player.video)).toBe(false, 'Video is still in the DOM!');
                     });
 
                     it('should emit AdStopped', function() {
@@ -669,25 +633,27 @@ describe('HTMLVideo(container)', function() {
                     var result;
 
                     beforeEach(function() {
-                        player.video = document.createElement('video');
-                        player.video.pause = jasmine.createSpy('video.pause()');
-                        player.video.paused = false;
+                        // player.videoSlot = document.createElement('video');
+                        player.loadedMetadata = true;
+                        player.videoSlot.pause = jasmine.createSpy('video.pause()');
+                        player.videoSlot.paused = false;
 
                         result = player.pauseAd();
                         result.then(success, failure);
                     });
 
                     it('should pause the video', function() {
-                        expect(player.video.pause).toHaveBeenCalledWith();
+                        expect(player.videoSlot.pause).toHaveBeenCalledWith();
                     });
 
                     describe('if the video is already paused', function() {
                         beforeEach(function(done) {
                             success.calls.reset();
                             failure.calls.reset();
-                            player.video.pause.calls.reset();
+                            player.videoSlot.pause.calls.reset();
 
-                            player.video.paused = true;
+                            player.videoSlot.paused = true;
+
 
                             result = player.pauseAd();
                             result.then(success, failure);
@@ -695,7 +661,7 @@ describe('HTMLVideo(container)', function() {
                         });
 
                         it('should not pause the video', function() {
-                            expect(player.video.pause).not.toHaveBeenCalled();
+                            expect(player.videoSlot.pause).not.toHaveBeenCalled();
                         });
 
                         it('should fulfill the Promise', function() {
@@ -710,7 +676,7 @@ describe('HTMLVideo(container)', function() {
                             AdPaused = jasmine.createSpy('AdPaused()');
                             player.on(VPAID_EVENTS.AdPaused, AdPaused);
 
-                            trigger(player.video, HTML_MEDIA_EVENTS.PAUSE);
+                            trigger(player.videoSlot, HTML_MEDIA_EVENTS.PAUSE);
                             result.then(done, done);
                         });
 
@@ -748,10 +714,12 @@ describe('HTMLVideo(container)', function() {
 
                     beforeEach(function(done) {
                         player.load([{ type: 'video/mp4', bitrate: 100, width: 500, height: 400, uri: 'http://videos.com/video3.mp4' }]).then(function(player) {
-                            player.video.play = jasmine.createSpy('video.play()');
-                            player.video.paused = true;
+                            player.videoSlot.play = jasmine.createSpy('video.play()');
+                            player.videoSlot.paused = true;
+
+
                         }).then(done, done.fail);
-                        trigger(container.children[0], HTML_MEDIA_EVENTS.LOADEDMETADATA);
+                        trigger(player.videoSlot, HTML_MEDIA_EVENTS.LOADEDMETADATA);
                     });
 
                     describe('if the video has not been played', function() {
@@ -762,7 +730,7 @@ describe('HTMLVideo(container)', function() {
                         });
 
                         it('should not play the video', function() {
-                            expect(player.video.play).not.toHaveBeenCalled();
+                            expect(player.videoSlot.play).not.toHaveBeenCalled();
                         });
 
                         it('should reject the Promise', function() {
@@ -772,23 +740,23 @@ describe('HTMLVideo(container)', function() {
 
                     describe('if the video has been played', function() {
                         beforeEach(function() {
-                            trigger(player.video, HTML_MEDIA_EVENTS.PLAYING);
+                            trigger(player.videoSlot, HTML_MEDIA_EVENTS.PLAYING);
 
                             result = player.resumeAd();
                             result.then(success, failure);
                         });
 
                         it('should play the video', function() {
-                            expect(player.video.play).toHaveBeenCalledWith();
+                            expect(player.videoSlot.play).toHaveBeenCalledWith();
                         });
 
                         describe('if the video is already playing', function() {
                             beforeEach(function(done) {
                                 success.calls.reset();
                                 failure.calls.reset();
-                                player.video.play.calls.reset();
+                                player.videoSlot.play.calls.reset();
 
-                                player.video.paused = false;
+                                player.videoSlot.paused = false;
 
                                 result = player.resumeAd();
                                 result.then(success, failure);
@@ -796,7 +764,7 @@ describe('HTMLVideo(container)', function() {
                             });
 
                             it('should not play the video', function() {
-                                expect(player.video.play).not.toHaveBeenCalled();
+                                expect(player.videoSlot.play).not.toHaveBeenCalled();
                             });
 
                             it('should fulfill the Promise', function() {
@@ -811,7 +779,7 @@ describe('HTMLVideo(container)', function() {
                                 AdPlaying = jasmine.createSpy('AdPlaying()');
                                 player.on(VPAID_EVENTS.AdPlaying, AdPlaying);
 
-                                trigger(player.video, HTML_MEDIA_EVENTS.PLAY);
+                                trigger(player.videoSlot, HTML_MEDIA_EVENTS.PLAY);
                                 result.then(done, done);
                             });
 

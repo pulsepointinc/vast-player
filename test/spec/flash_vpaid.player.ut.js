@@ -8,7 +8,7 @@ var resolveURL = require('url').resolve;
 var querystring = require('querystring');
 var VPAIDVersion = require('../../lib/VPAIDVersion');
 
-describe('FlashVPAID(container, swfURI)', function() {
+describe('FlashVPAID(slot, videoSlot, swfURI)', function() {
     var FlashVPAID;
     var uuid;
     var stubs;
@@ -67,21 +67,27 @@ describe('FlashVPAID(container, swfURI)', function() {
     });
 
     describe('instance:', function() {
-        var container, swfURI;
+        var slot, videoSlot, swfURI;
         var player;
 
         beforeEach(function() {
-            container = document.createElement('div');
-            container.style.width = '800px';
-            container.style.height = '600px';
-            document.body.appendChild(container);
+            slot = document.createElement('div');
+            slot.style.width = '800px';
+            slot.style.height = '600px';
+            document.body.appendChild(slot);
+            videoSlot = document.createElement('div');
+            videoSlot.style.width = '800px';
+            videoSlot.style.height = '600px';
+            document.body.appendChild(videoSlot);
+
             swfURI = 'swf/vpaid.swf';
 
-            player = new FlashVPAID(container, swfURI);
+            player = new FlashVPAID(slot,videoSlot, swfURI);
         });
 
         afterEach(function() {
-            document.body.removeChild(container);
+            document.body.removeChild(slot);
+            document.body.removeChild(videoSlot);
         });
 
         it('should exist', function() {
@@ -121,7 +127,7 @@ describe('FlashVPAID(container, swfURI)', function() {
                     result = player.load(mediaFiles, parameters);
                     result.then(success, failure);
 
-                    object = container.children[0];
+                    object = slot.children[0];
                     eventFnName = 'vast_player__' + uuid.calls.mostRecent().returnValue;
                     eventCallback = window[eventFnName];
                 });
@@ -136,8 +142,8 @@ describe('FlashVPAID(container, swfURI)', function() {
                     expect(result).toEqual(jasmine.any(LiePromise));
                 });
 
-                it('should create an <object> in the container', function() {
-                    expect(container.children.length).toBe(1);
+                it('should create an <object> in the slot', function() {
+                    expect(slot.children.length).toBe(1);
                     expect(object.tagName).toBe('OBJECT');
                     expect(object.type).toBe('application/x-shockwave-flash');
                     expect(object.data).toBe(resolveURL(window.location.href, swfURI + '?' + querystring.stringify({
@@ -147,7 +153,7 @@ describe('FlashVPAID(container, swfURI)', function() {
                     expect(object.style.display).toBe('block');
                     expect(object.style.width).toBe('100%');
                     expect(object.style.height).toBe('100%');
-                    expect(object.style.border).toBe('none');
+                    expect(object.style.border).toContain('none');
                     expect(object.style.opacity).toBe('0');
                     expect(object.querySelector('param[name="movie"]').getAttribute('value')).toBe(swfURI, 'param[movie]');
                     expect(object.querySelector('param[name="flashvars"]').getAttribute('value')).toBe(querystring.stringify({
@@ -321,8 +327,8 @@ describe('FlashVPAID(container, swfURI)', function() {
                                 beforeEach(function() {
                                     spyOn(player, 'resizeAd').and.returnValue(LiePromise.resolve(player));
 
-                                    container.style.width = '1024px';
-                                    container.style.height = '768px';
+                                    slot.style.width = '1024px';
+                                    slot.style.height = '768px';
                                     player.emit('VPAIDInterfaceResize');
                                 });
 

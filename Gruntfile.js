@@ -59,6 +59,10 @@ module.exports = function gruntfile(grunt) {
                     {
                         src: 'index.js',
                         dest: 'dist/vast-player.js'
+                    },
+                    {
+                        src: 'indexvpaidwrapper.js',
+                        dest: 'dist/vpaid-wrapper.js'
                     }
                 ]
             },

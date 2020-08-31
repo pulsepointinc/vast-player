@@ -8,7 +8,7 @@ var VPAID_EVENTS = require('../../lib/enums/VPAID_EVENTS');
 var environment = require('../../lib/environment');
 var VPAIDVersion = require('../../lib/VPAIDVersion');
 
-describe('JavaScriptVPAID(container)', function() {
+describe('JavaScriptVPAID(slot, videoSlot)', function() {
     var JavaScriptVPAID;
     var stubs;
 
@@ -73,20 +73,25 @@ describe('JavaScriptVPAID(container)', function() {
     });
 
     describe('instance:', function() {
-        var container;
+        var slot, videoSlot;
         var player;
 
         beforeEach(function() {
-            container = document.createElement('div');
-            container.style.width = '800px';
-            container.style.height = '600px';
-            document.body.appendChild(container);
+            slot = document.createElement('div');
+            slot.style.width = '800px';
+            slot.style.height = '600px';
+            document.body.appendChild(slot);
+            videoSlot = document.createElement('video');
+            videoSlot.style.width = '800px';
+            videoSlot.style.height = '600px';
+            document.body.appendChild(videoSlot);
 
-            player = new JavaScriptVPAID(container);
+            player = new JavaScriptVPAID(slot, videoSlot);
         });
 
         afterEach(function() {
-            document.body.removeChild(container);
+            document.body.removeChild(slot);
+            document.body.removeChild(videoSlot);
         });
 
         it('should exist', function() {
@@ -105,7 +110,7 @@ describe('JavaScriptVPAID(container)', function() {
             describe('load(mediaFiles, parameters)', function() {
                 var mediaFiles, parameters;
                 var success, failure;
-                var iframe, script, video;
+                var iframe, script;
                 var result;
 
                 beforeEach(function() {
@@ -130,24 +135,23 @@ describe('JavaScriptVPAID(container)', function() {
                     result = player.load(mediaFiles, parameters);
                     result.then(success, failure);
 
-                    iframe = container.children[0];
+                    iframe = slot.children[0];
                     script = iframe.contentWindow.document.head.querySelector('x-script');
-                    video = iframe.contentWindow.document.body.querySelector('video');
                 });
 
                 it('should return a Promise', function() {
                     expect(result).toEqual(jasmine.any(LiePromise));
                 });
 
-                it('should create an <iframe> in the container', function() {
-                    expect(container.children.length).toBe(1);
+                it('should create an <iframe> in the slot', function() {
+                    expect(slot.children.length).toBe(1);
                     expect(iframe.tagName).toBe('IFRAME');
                     expect(iframe.src).toBe('about:blank');
                     expect(iframe.style.width).toBe('100%');
                     expect(iframe.style.height).toBe('100%');
                     expect(iframe.style.display).toBe('block');
                     expect(iframe.style.opacity).toBe('0');
-                    expect(iframe.style.border).toBe('none');
+                    expect(iframe.style.border).toContain('none');
                     expect(iframe.contentWindow.document.body.style.margin).toBe('0px');
                 });
 
@@ -165,15 +169,6 @@ describe('JavaScriptVPAID(container)', function() {
                     expect(document.createElement).not.toHaveBeenCalledWith('x-script');
 
                     expect(script.src).toBe(mediaFiles[0].uri);
-                });
-
-                it('should create a <video> in the <body> of the <iframe>', function() {
-                    expect(iframe.contentWindow.document.body.querySelector('video')).not.toBeNull();
-                    expect(video.getAttribute('webkit-playsinline')).toBe('true');
-                    expect(video.style.display).toBe('block');
-                    expect(video.style.width).toBe('100%');
-                    expect(video.style.height).toBe('100%');
-                    expect(video.style.objectFit).toBe('contain');
                 });
 
                 describe('when the script loads', function() {
@@ -203,41 +198,11 @@ describe('JavaScriptVPAID(container)', function() {
                             it('should call initAd()', function() {
                                 expect(vpaid.initAd).toHaveBeenCalledWith(800, 600, 'normal', mediaFiles[0].bitrate, { AdParameters: parameters }, {
                                     slot: iframe.contentWindow.document.body,
-                                    videoSlot: video,
+                                    videoSlot: videoSlot,
                                     videoSlotCanAutoPlay: environment.isDesktop
                                 });
                             });
 
-                            describe('when the container is resized', function() {
-                                beforeEach(function(done) {
-                                    spyOn(player, 'resizeAd').and.returnValue(LiePromise.resolve(player));
-
-                                    container.style.width = '1024px';
-                                    container.style.height = '768px';
-
-                                    process.nextTick(done);
-                                });
-
-                                it('should resize the ad', function() {
-                                    expect(player.resizeAd).toHaveBeenCalledWith(1024, 768, 'normal');
-                                });
-
-                                describe('after the ad is stopped', function() {
-                                    beforeEach(function(done) {
-                                        player.resizeAd.calls.reset();
-                                        player.emit(VPAID_EVENTS.AdStopped);
-
-                                        container.style.width = '800px';
-                                        container.style.height = '600px';
-
-                                        process.nextTick(done);
-                                    });
-
-                                    it('should not resize the ad', function() {
-                                        expect(player.resizeAd).not.toHaveBeenCalled();
-                                    });
-                                });
-                            });
 
                             describe('when AdLoaded is emitted', function() {
                                 beforeEach(function(done) {

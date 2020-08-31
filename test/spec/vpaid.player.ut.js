@@ -7,7 +7,7 @@ var EVENTS = require('../../lib/enums/VPAID_EVENTS');
 
 function noop() {}
 
-describe('VPAID(container)', function() {
+describe('VPAID(slot, videoSlot)', function() {
     var VPAID;
     var stubs;
 
@@ -70,20 +70,25 @@ describe('VPAID(container)', function() {
     });
 
     describe('instance:', function() {
-        var container;
+        var slot, videoSlot;
         var player;
 
         beforeEach(function() {
-            container = document.createElement('div');
-            container.style.width = '800px';
-            container.style.height = '600px';
-            document.body.appendChild(container);
+            slot = document.createElement('div');
+            slot.style.width = '800px';
+            slot.style.height = '600px';
+            document.body.appendChild(slot);
+            videoSlot = document.createElement('video');
+            videoSlot.style.width = '800px';
+            videoSlot.style.height = '600px';
+            document.body.appendChild(videoSlot);
 
-            player = new VPAID(container);
+            player = new VPAID(slot, videoSlot);
         });
 
         afterEach(function() {
-            document.body.removeChild(container);
+            document.body.removeChild(slot);
+            document.body.removeChild(videoSlot);
         });
 
         it('should exist', function() {
@@ -91,9 +96,9 @@ describe('VPAID(container)', function() {
         });
 
         describe('properties:', function() {
-            describe('container:', function() {
-                it('should be the container', function() {
-                    expect(player.container).toBe(container);
+            describe('slot:', function() {
+                it('should be the slot', function() {
+                    expect(player.slot).toBe(slot);
                 });
             });
 
@@ -120,7 +125,7 @@ describe('VPAID(container)', function() {
                     });
 
                     it('should throw an Error', function() {
-                        expect(function() { noop(player.adLinear); }).toThrow(new Error('Ad has not been loaded.'));
+                        expect(function() { noop(player.adLinear); }).toThrow(new Error('VPAIDPlayerNotReady:getAdLinear'));
                     });
                 });
 
@@ -151,7 +156,7 @@ describe('VPAID(container)', function() {
                     });
 
                     it('should throw an Error', function() {
-                        expect(function() { noop(player.adWidth); }).toThrow(new Error('Ad has not been loaded.'));
+                        expect(function() { noop(player.adWidth); }).toThrow(new Error('VPAIDPlayerNotReady:getAdWidth'));
                     });
                 });
 
@@ -182,7 +187,7 @@ describe('VPAID(container)', function() {
                     });
 
                     it('should throw an Error', function() {
-                        expect(function() { noop(player.adHeight); }).toThrow(new Error('Ad has not been loaded.'));
+                        expect(function() { noop(player.adHeight); }).toThrow(new Error('VPAIDPlayerNotReady:getAdHeight'));
                     });
                 });
 
@@ -213,7 +218,7 @@ describe('VPAID(container)', function() {
                     });
 
                     it('should throw an Error', function() {
-                        expect(function() { noop(player.adExpanded); }).toThrow(new Error('Ad has not been loaded.'));
+                        expect(function() { noop(player.adExpanded); }).toThrow(new Error('VPAIDPlayerNotReady:getAdExpanded'));
                     });
                 });
 
@@ -244,7 +249,7 @@ describe('VPAID(container)', function() {
                     });
 
                     it('should throw an Error', function() {
-                        expect(function() { noop(player.adSkippableState); }).toThrow(new Error('Ad has not been loaded.'));
+                        expect(function() { noop(player.adSkippableState); }).toThrow(new Error('VPAIDPlayerNotReady:getAdSkippableState'));
                     });
                 });
 
@@ -275,7 +280,7 @@ describe('VPAID(container)', function() {
                     });
 
                     it('should throw an Error', function() {
-                        expect(function() { noop(player.adRemainingTime); }).toThrow(new Error('Ad has not been loaded.'));
+                        expect(function() { noop(player.adRemainingTime); }).toThrow(new Error('VPAIDPlayerNotReady:getAdRemainingTime'));
                     });
                 });
 
@@ -306,7 +311,7 @@ describe('VPAID(container)', function() {
                     });
 
                     it('should throw an Error', function() {
-                        expect(function() { noop(player.adDuration); }).toThrow(new Error('Ad has not been loaded.'));
+                        expect(function() { noop(player.adDuration); }).toThrow(new Error('VPAIDPlayerNotReady:getAdDuration'));
                     });
                 });
 
@@ -338,13 +343,13 @@ describe('VPAID(container)', function() {
 
                     describe('getting', function() {
                         it('should throw an Error', function() {
-                            expect(function() { noop(player.adVolume); }).toThrow(new Error('Ad has not been loaded.'));
+                            expect(function() { noop(player.adVolume); }).toThrow(new Error('VPAIDPlayerNotReady:getAdVolume'));
                         });
                     });
 
                     describe('setting', function() {
                         it('should throw an Error', function() {
-                            expect(function() { player.adVolume = 0.5; }).toThrow(new Error('Ad has not been loaded.'));
+                            expect(function() { player.adVolume = 0.5; }).toThrow(new Error('VPAIDPlayerNotReady:setAdVolume'));
                         });
                     });
                 });
@@ -390,7 +395,7 @@ describe('VPAID(container)', function() {
                     });
 
                     it('should throw an Error', function() {
-                        expect(function() { noop(player.adCompanions); }).toThrow(new Error('Ad has not been loaded.'));
+                        expect(function() { noop(player.adCompanions); }).toThrow(new Error('VPAIDPlayerNotReady:getAdCompanions'));
                     });
                 });
 
@@ -434,7 +439,7 @@ describe('VPAID(container)', function() {
                     });
 
                     it('should throw an Error', function() {
-                        expect(function() { noop(player.adIcons); }).toThrow(new Error('Ad has not been loaded.'));
+                        expect(function() { noop(player.adIcons); }).toThrow(new Error('VPAIDPlayerNotReady:getAdIcons'));
                     });
                 });
 
@@ -483,7 +488,7 @@ describe('VPAID(container)', function() {
                     });
 
                     it('should return a rejected Promise', function() {
-                        expect(failure).toHaveBeenCalledWith(new Error('Ad has not been loaded.'));
+                        expect(failure).toHaveBeenCalledWith(new Error('VPAIDPlayerNotReady:resizeAd'));
                     });
                 });
 
@@ -524,7 +529,7 @@ describe('VPAID(container)', function() {
                     });
 
                     it('should return a rejected Promise', function() {
-                        expect(failure).toHaveBeenCalledWith(new Error('Ad has not been loaded.'));
+                        expect(failure).toHaveBeenCalledWith(new Error('VPAIDPlayerNotReady:startAd'));
                     });
                 });
 
@@ -565,7 +570,7 @@ describe('VPAID(container)', function() {
                     });
 
                     it('should return a rejected Promise', function() {
-                        expect(failure).toHaveBeenCalledWith(new Error('Ad has not been loaded.'));
+                        expect(failure).toHaveBeenCalledWith(new Error('VPAIDPlayerNotReady:stopAd'));
                     });
                 });
 
@@ -606,7 +611,7 @@ describe('VPAID(container)', function() {
                     });
 
                     it('should return a rejected Promise', function() {
-                        expect(failure).toHaveBeenCalledWith(new Error('Ad has not been loaded.'));
+                        expect(failure).toHaveBeenCalledWith(new Error('VPAIDPlayerNotReady:pauseAd'));
                     });
                 });
 
@@ -647,7 +652,7 @@ describe('VPAID(container)', function() {
                     });
 
                     it('should return a rejected Promise', function() {
-                        expect(failure).toHaveBeenCalledWith(new Error('Ad has not been loaded.'));
+                        expect(failure).toHaveBeenCalledWith(new Error('VPAIDPlayerNotReady:resumeAd'));
                     });
                 });
 
@@ -688,7 +693,7 @@ describe('VPAID(container)', function() {
                     });
 
                     it('should return a rejected Promise', function() {
-                        expect(failure).toHaveBeenCalledWith(new Error('Ad has not been loaded.'));
+                        expect(failure).toHaveBeenCalledWith(new Error('VPAIDPlayerNotReady:expandAd'));
                     });
                 });
 
@@ -729,7 +734,7 @@ describe('VPAID(container)', function() {
                     });
 
                     it('should return a rejected Promise', function() {
-                        expect(failure).toHaveBeenCalledWith(new Error('Ad has not been loaded.'));
+                        expect(failure).toHaveBeenCalledWith(new Error('VPAIDPlayerNotReady:collapseAd'));
                     });
                 });
 
@@ -770,7 +775,7 @@ describe('VPAID(container)', function() {
                     });
 
                     it('should return a rejected Promise', function() {
-                        expect(failure).toHaveBeenCalledWith(new Error('Ad has not been loaded.'));
+                        expect(failure).toHaveBeenCalledWith(new Error('VPAIDPlayerNotReady:skipAd'));
                     });
                 });
 

@@ -29,9 +29,9 @@ describe('HTMLVideoTracker(video)', function() {
 
         beforeEach(function() {
             video = document.createElement('video');
-            video.duration = 30.754;
-            video.currentTime = 0;
-            video.paused = true;
+            Object.defineProperty(video, 'duration', {value:30.754, writable:true});
+            Object.defineProperty(video, 'currentTime', {value:0, writable:true});
+            Object.defineProperty(video, 'paused', {value:true, writable:true});
 
             tracker = new HTMLVideoTracker(video);
         });
